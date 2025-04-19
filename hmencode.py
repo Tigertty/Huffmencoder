@@ -1,4 +1,5 @@
 import heapq
+import sys
 
 class Treenode:
     def __init__(self, key, num):
@@ -16,13 +17,14 @@ def read_file(file_path):
     return lines
 
 def generate_code_table(node, code_table, code=''):
+    #check is there still node
     if node is not None:
+        #check if its parent node
         if node.key is not None:
             code_table[node.key] = code
         generate_code_table(node.left, code_table, code + '0')
         generate_code_table(node.right, code_table, code + '1')
-
-    return code_table
+    return
 
 def hmencoder(x):
     # Read the input file
@@ -42,7 +44,7 @@ def hmencoder(x):
     for key, num in chdict.items():
         heapq.heappush(node_heap,Treenode(key,num))
 
-    # Build Huffman tree
+    # Build Huffman tree: each loop reduce the heap list by two and make a parent node then put it back in
     while len(node_heap) > 1 :
         left = heapq.heappop(node_heap)
         right = heapq.heappop(node_heap)
@@ -51,14 +53,14 @@ def hmencoder(x):
         parent.right = right
         heapq.heappush(node_heap,parent)
 
+    #now the tree is built and the root is the node left in the heap
     root = node_heap[0]
-    print(root)
 
     #making the code table
     code_table = {}
     generate_code_table(root,code_table)
 
-    #outputing the code table with average bits calculation
+    #outputting the code table with average bits calculation
     total_bits = 0
     total_char = len(para)
     with open("code.txt","w") as file:
@@ -79,4 +81,10 @@ def hmencoder(x):
         for ch in para:
             msg.write(code_table[ch])
                 
-hmencoder("input.txt")
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python hmencode.py input_file")
+        sys.exit(1)
+    
+    input_file = sys.argv[1]
+    hmencoder(input_file)
